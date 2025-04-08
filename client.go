@@ -9,7 +9,7 @@ import (
 type ClientMessage struct {
 	Username  string `json:"username"`
 	Message   string `json:"message"`
-	Timestamp string `json:"timestamp"`
+	Timestamp int64  `json:"timestamp"`
 }
 
 type Client struct {
