@@ -18,26 +18,10 @@ type Client struct {
 }
 
 func NewClient(conn *websocket.Conn) *Client {
-	c := &Client{
+	return &Client{
 		conn: conn,
 		send: make(chan []byte),
 	}
-
-	history, err := LoadLastMessages(50)
-	if err == nil {
-		for _, m := range history {
-			out, err := json.Marshal(ClientMessage{
-				Username:  m.Username,
-				Message:   m.Message,
-				Timestamp: m.Timestamp,
-			})
-			if err == nil {
-				c.send <- out
-			}
-		}
-	}
-
-	return c
 }
 
 func (c *Client) ReadMessages(hub *Hub) {
@@ -61,7 +45,6 @@ func (c *Client) ReadMessages(hub *Hub) {
 			continue
 		}
 
-		// сохраняем в базу
 		dbMsg := Message{
 			Username:  incoming.Username,
 			Message:   incoming.Message,
@@ -79,6 +62,22 @@ func (c *Client) ReadMessages(hub *Hub) {
 }
 
 func (c *Client) WriteMessages() {
+	go func() {
+		history, err := LoadLastMessages(50)
+		if err == nil {
+			for _, m := range history {
+				out, err := json.Marshal(ClientMessage{
+					Username:  m.Username,
+					Message:   m.Message,
+					Timestamp: m.Timestamp,
+				})
+				if err == nil {
+					c.send <- out
+				}
+			}
+		}
+	}()
+
 	defer func(conn *websocket.Conn) {
 		err := conn.Close()
 		if err != nil {

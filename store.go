@@ -10,7 +10,7 @@ type Message struct {
 	ID        int
 	Username  string
 	Message   string
-	Timestamp int64 // тоже заменить на int64
+	Timestamp int64
 }
 
 var db *sql.DB
