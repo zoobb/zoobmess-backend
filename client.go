@@ -40,6 +40,7 @@ func (c *Client) ReadMessages(hub *Hub) {
 		}
 		var incoming ClientMessage
 		err = json.Unmarshal(msg, &incoming)
+		log.Printf("Received from client: %+v\n", incoming)
 		if err != nil {
 			log.Println("Invalid JSON:", err)
 			continue
@@ -58,6 +59,7 @@ func (c *Client) ReadMessages(hub *Hub) {
 		}
 
 		hub.broadcast <- out
+		log.Println("Message broadcasted")
 	}
 }
 
@@ -86,6 +88,7 @@ func (c *Client) WriteMessages() {
 	}(c.conn)
 
 	for msg := range c.send {
+		log.Printf("Sending to client: %s\n", string(msg))
 		err := c.conn.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			break
