@@ -23,13 +23,13 @@ func InitDB() {
 	}
 
 	createTableQuery := `
-	CREATE TABLE IF NOT EXISTS messages (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT NOT NULL,
-		message TEXT NOT NULL,
-		timestamp TEXT NOT NULL
-	);
-	`
+CREATE TABLE IF NOT EXISTS messages (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	username TEXT NOT NULL,
+	message TEXT NOT NULL,
+	timestamp INTEGER NOT NULL
+);
+`
 
 	_, err = db.Exec(createTableQuery)
 	if err != nil {
