@@ -67,3 +67,15 @@ func LoadLastMessages(limit int) ([]Message, error) {
 	}
 	return messages, nil
 }
+
+func UpdateMessage(id int, newContent string) error {
+	query := `UPDATE messages SET message = ? WHERE id = ?`
+	_, err := db.Exec(query, newContent, id)
+	return err
+}
+
+func DeleteMessage(id int) error {
+	query := `DELETE FROM messages WHERE id = ?`
+	_, err := db.Exec(query, id)
+	return err
+}

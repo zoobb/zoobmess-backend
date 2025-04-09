@@ -7,9 +7,11 @@ import (
 )
 
 type ClientMessage struct {
-	Username  string `json:"username"`
-	Message   string `json:"message"`
-	Timestamp int64  `json:"timestamp"`
+	Type      string `json:"type"`
+	ID        int    `json:"id,omitempty"`
+	Username  string `json:"username,omitempty"`
+	Message   string `json:"message,omitempty"`
+	Timestamp int64  `json:"timestamp,omitempty"`
 }
 
 type Client struct {
@@ -40,10 +42,37 @@ func (c *Client) ReadMessages(hub *Hub) {
 		}
 		var incoming ClientMessage
 		err = json.Unmarshal(msg, &incoming)
-		log.Printf("Received from client: %+v\n", incoming)
 		if err != nil {
 			log.Println("Invalid JSON:", err)
 			continue
+		}
+
+		switch incoming.Type {
+		case "message":
+			dbMsg := Message{
+				Username:  incoming.Username,
+				Message:   incoming.Message,
+				Timestamp: incoming.Timestamp,
+			}
+			_ = SaveMessage(dbMsg)
+			out, _ := json.Marshal(incoming)
+			hub.broadcast <- out
+
+		case "update":
+			if incoming.ID > 0 && incoming.Message != "" {
+				err := UpdateMessage(incoming.ID, incoming.Message)
+				if err == nil {
+					log.Printf("Updated message ID %d\n", incoming.ID)
+				}
+			}
+
+		case "delete":
+			if incoming.ID > 0 {
+				err := DeleteMessage(incoming.ID)
+				if err == nil {
+					log.Printf("Deleted message ID %d\n", incoming.ID)
+				}
+			}
 		}
 
 		dbMsg := Message{
